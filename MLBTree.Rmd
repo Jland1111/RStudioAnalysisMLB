@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+install.packages("party")
+```
+
+```{r}
+library(tidyverse)
+library(party)
+```
+
+```{r}
+batting <- read.csv("batting2019.csv")
+
+structure(batting)
+```
+
+
+```{r}
+#Get the first 105 students
+players <- PLAYER[c(1:105),]
+players
+```
+
+```{r}
+MLBtree <- ctree(H ~ AB + OBP + SLG , data = batting)
+MLBtree
+```
+
+```{r}
+plot(MLBtree)
+```
+
+
+
+```{r}
+testPlayer <- data.frame(AB = as.integer(c(500)),
+                          OBP = as.double(c(.320)),
+                          SLG = as.double(c(.400)))
+
+predictedPlayer <- predict(MLBtree, newdata = testPlayer)
+predictedPlayer
+```
+
+
+
+
