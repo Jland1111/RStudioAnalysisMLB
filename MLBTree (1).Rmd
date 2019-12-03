@@ -1,0 +1,102 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+install.packages("party")
+```
+
+```{r}
+library(tidyverse)
+library(party)
+```
+
+```{r}
+batting <- read.csv("batting2019.csv")
+
+structure(batting)
+```
+
+
+```{r}
+#Get the first 105 students
+players <- PLAYER[c(1:105),]
+players
+```
+
+```{r}
+MLBtree <- ctree(H ~ AB + OBP + SLG , data = batting)
+MLBtree
+```
+
+```{r}
+plot(MLBtree)
+```
+
+
+
+```{r}
+testPlayer <- data.frame(AB = as.integer(c(500)),
+                          OBP = as.double(c(.320)),
+                          SLG = as.double(c(.400)))
+
+predictedPlayer <- predict(MLBtree, newdata = testPlayer)
+predictedPlayer
+```
+
+
+#  added variables 
+```{r}
+#Get the first 105 students
+players <- PLAYER[c(1:105),]
+players
+```
+
+
+```{r}
+MLBtree1 <- ctree(H ~ AB + OBP + SLG + AVG ,  data = batting)
+MLBtree1
+```
+
+
+```{r}
+plot(MLBtree1)
+```
+
+```{r}
+testPlayer1 <- data.frame(AB = as.integer(c(500)),
+                          OBP = as.double(c(.320)),
+                          SLG = as.double(c(.400)),
+                          AVG = as.double(c(.300)))
+
+predictedPlayer1 <- predict(MLBtree1, newdata = testPlayer1)
+predictedPlayer1
+```
+
+
+# More Variables part 3
+
+```{r}
+MLBtree11 <- ctree(H ~ AB + OBP + SLG + AVG + SO + BB ,  data = batting)
+MLBtree11
+```
+
+
+```{r}
+plot(MLBtree11)
+```
+
+
+```{r}
+testPlayer11 <- data.frame(AB = as.integer(c(500)),
+                          OBP = as.double(c(.320)),
+                          SLG = as.double(c(.400)),
+                          AVG = as.double(c(.300)),
+                          SO = as.integer(c(100)),
+                          BB = as.integer(c(111)))
+
+predictedPlayer11 <- predict(MLBtree11, newdata = testPlayer11)
+predictedPlayer11
+```
