@@ -1,0 +1,299 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+
+library(tidyverse)
+```
+
+```{r}
+batting <- read.csv("batting2019.csv")
+
+structure(batting)
+```
+
+
+```{r}
+ggplot(data = batting, mapping = aes(x = AVG, y = H)) +
+  geom_point(mapping = aes(color = HR)) +
+  geom_smooth(method = "lm") +
+  labs(title = "AVG vs H" ,
+         subtitle = "batting" ,
+         x = "AVG")
+```
+
+
+```{r}
+hB <- select(batting, c("AVG", "H"))
+pairs(hB)
+```
+
+
+```{r}
+hBCorrelation <- cor(batting$AVG, batting$H)
+
+```
+
+
+```{r}
+model1 <- lm(H ~ AVG + SLG, data = batting)
+model1
+```
+
+
+```{r}
+# Create a data frame with a single GD entry
+test1 <- data.frame(AVG = c(.305), SLG = C(.500))
+```
+
+
+```{r}
+model2 <- lm(H ~ AVG + OBP, data = batting)
+model2
+```
+
+
+```{r}
+# Create a data frame with a single GD entry
+test2 <- data.frame(AVG = c(.305), OBP = c(.400))
+
+# Predict the position with the model and test data
+predictedH2 <- predict(model2, test2)
+cat("At .305 AVG, the amount of Hits is", predictedH2)
+```
+
+
+```{r}
+model3 <- lm(H ~ AVG + OBP + SLG, data = batting)
+model3
+```
+
+
+```{r}
+# Create a data frame with a single GD entry
+test3 <- data.frame(AVG = c(.305), OBP = c(.400), SLG = c(.500))
+
+# Predict the position with the model and test data
+predictedH3 <- predict(model3, test3)
+cat("At .305 AVG, the amount of Hits is", predictedH3)
+```
+
+
+```{r}
+# Output table with AVG of .305
+avg305 <- subset(batting, AVG == .305)
+avg305
+```
+
+
+```{r}
+# Calculate the average and sd of H when AVG is .300
+avgH <- mean(avg305$H)
+sdH <- sd(avg305$H)
+```
+
+
+
+```{r}
+install.packages("caTools")
+
+library(caTools)
+```
+
+
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample2 = sample.split(batting$AB, SplitRatio = .75)
+train2 = subset(batting, sample2 == TRUE)
+test2  = subset(batting, sample2 == FALSE)
+```
+
+
+```{r}
+predict1 <- lm(H ~ AVG, data = test2)
+predict1
+```
+
+
+```{r}
+# Predict the position with the model and test data
+predictedH <- predict(predict1, test2)
+predictedH
+```
+
+
+```{r}
+# Create data frame with actual and predicted values
+battingPrediction1 <- data.frame(AVG = test2$AVG, 
+                               ActualH = test2$H,
+                               PredictedH = predictedH)
+
+battingPrediction1
+```
+
+
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample3 = sample.split(batting$AB, SplitRatio = .75)
+train3 = subset(batting, sample3 == TRUE)
+test3  = subset(batting, sample3 == FALSE)
+```
+
+
+
+```{r}
+predict2 <- lm(H ~ AVG + OBP, data = train3)
+predict2
+```
+
+
+```{r}
+# Predict the position with the model and test data
+predictedH1 <- predict(predict2, test3)
+predictedH1
+```
+
+
+```{r}
+# Create data frame with actual and predicted values
+battingPrediction2 <- data.frame(AVG = test3$AVG, 
+                               ActualH = test3$H,
+                               PredictedH = predictedH1)
+
+battingPrediction2
+```
+
+
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample4 = sample.split(batting$AB, SplitRatio = .75)
+train4 = subset(batting, sample4 == TRUE)
+test4  = subset(batting, sample4 == FALSE)
+
+```
+
+
+
+```{r}
+predict3 <- lm(H ~ AVG + OBP + SLG, data = train4)
+predict3
+```
+
+
+```{r}
+# Predict the position with the model and test data
+predictedH2 <- predict(predict3, test4)
+predictedH2
+```
+
+
+```{r}
+# Create data frame with actual and predicted values
+battingPrediction3 <- data.frame(AVG = test2$AVG, 
+                               ActualH = test4$H,
+                               PredictedH = predictedH2)
+
+battingPrediction3
+```
+
+
+
+```{r}
+ggplot(data = battingPrediction1, mapping = aes(x = AVG)) +
+  geom_point(data = battingPrediction1, 
+             mapping = aes(y = ActualH),
+             color = "blue") +
+  geom_point(data = battingPrediction1, 
+             mapping = aes(y = predictedH), 
+             color = "red") +
+  labs(title = "Hits vs. AVG" ,
+        subtitle = "Actual (Blue) vs. Predicted (Red)",
+        y = "Hits")
+```
+
+
+```{r}
+summary(model2)
+```
+
+
+```{r}
+# Using the Metrics library for MSE
+install.packages("Metrics")
+
+library(Metrics)
+```
+
+
+```{r}
+mae1 <- mae(battingPrediction1$ActualH, battingPrediction1$PredictedH)
+cat("Mean Absolute Error:", mae1)
+```
+
+
+```{r}
+mse1 <- mse(battingPrediction1$ActualH, battingPrediction1$PredictedH)
+cat("Mean Squared Error:", mse1)
+```
+
+
+```{r}
+sqrt(mse1)
+```
+
+
+```{r}
+rmse1 <- rmse(battingPrediction1$ActualH, battingPrediction1$PredictedH)
+rmse1
+```
+
+
+```{r}
+mae2 <- mae(battingPrediction2$ActualH, battingPrediction2$PredictedH)
+cat("Mean Absolute Error:", mae2)
+```
+
+
+```{r}
+mse2 <- mse(battingPrediction2$ActualH, battingPrediction2$PredictedH)
+cat("Mean Squared Error:", mse2)
+```
+
+
+```{r}
+sqrt(mse2)
+```
+
+
+```{r}
+rmse2 <- rmse(battingPrediction2$ActualH, battingPrediction2$PredictedH)
+rmse2
+```
+
+
+```{r}
+mae3 <- mae(battingPrediction3$ActualH, battingPrediction3$PredictedH)
+cat("Mean Absolute Error:", mae3)
+```
+
+```{r}
+mse3 <- mse(battingPrediction3$ActualH, battingPrediction3$PredictedH)
+cat("Mean Squared Error:", mse3)
+```
+
+```{r}
+sqrt(mse3)
+```
+
