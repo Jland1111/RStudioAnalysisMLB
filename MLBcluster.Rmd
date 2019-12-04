@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+
+```{r}
+library(ggplot2)
+```
+
+
+```{r}
+batting <- read.csv("batting2019.csv")
+
+structure(batting)
+```
+
+
+```{r}
+ggplot(data = batting, mapping = aes(x = AVG, y = H)) +
+  geom_point(mapping = aes(color = HR)) +
+  geom_smooth(method = "lm") +
+  labs(title = "Batting Average vs Hits" ,
+         subtitle = "batting" ,
+         x = "AVG")
+```
+
+
+```{r}
+set.seed(20)
+
+mlbHits <- data.frame(H = batting$H, AB =batting$AB)
+head(mlbHits)
+```
+
+
+```{r}
+mlbCluster <- kmeans(mlbHits, 3, nstart = 25)
+mlbCluster
+```
+
+
+```{r}
+table(mlbCluster$cluster, batting$H)
+```
+
+
+```{r}
+mlbHits$Cluster <- as.factor(mlbCluster$cluster)
+
+
+centroids <- as.data.frame(mlbCluster$centers)
+centroids$Cluster <- as.factor(c(1:3))
+
+
+ggplot(data = mlbHits, mapping = aes(x = H, y = AB, color = Cluster))+
+  geom_point()+
+  geom_point(data = centroids,aes(x = H, y = AB, fill = Cluster), size = 5, shape = 13) + labs(title = "At-Bats vs. Hits", x = "Hits", y = "At-Bats")
+```
+
+
+```{r}
+wss <- numeric(15)
+for (k in 1:15)
+  wss[k] = sum(kmeans(mlbHits, k, nstart = 25)$withinss)
+```
+
+
+```{r}
+wssResults <- data.frame(k = c(1:15), wss = wss)
+wssResults
+```
+
+
+```{r}
+ggplot(data = wssResults, mapping = aes(x = k, y = wss))+
+  geom_point()+
+  geom_line()+
+  labs(title = "K-means: MLB Hits", x = "K", y = "WSS")
+```
+
+
+
