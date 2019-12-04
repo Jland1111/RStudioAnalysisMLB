@@ -1,0 +1,264 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Loading Tidyverse
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+
+```
+#Uploading dataset
+```{r}
+batting <- read.csv("batting2019.csv")
+
+structure(batting)
+```
+# Visualize the data
+Average vs. Hits
+```{r}
+ggplot(data = batting, mapping = aes(x = AVG, y = H)) +
+  geom_point(mapping = aes(color = HR)) +
+  geom_smooth(method = "lm") +
+  labs(title = "Average vs. Hits" ,
+         subtitle = "Source: MLB Batting Stats 2019" ,
+         x = "Average", y = "Hits")
+```
+# Correlation: Pairs Plot
+Pair plot to see correlation between variables
+```{r}
+hB19 <- select(batting, c("AVG", "H"))
+pairs(hB19)
+```
+# Corrlation: calculation
+Calculate correlation value [-1, 1]
+```{r}
+hBCorrelation19 <- cor(batting$AVG, batting$H)
+```
+# Multivariate Linear Regression 1
+Given 2 independent variables, predict the dependent variable.
+Given the batting average and slugging percentage, let's predict the player's amount of hits.
+```{r}
+model191 <- lm(H ~ AVG + SLG, data = batting)
+model191
+```
+# Prediction
+Given an average of .305 and slugging of .500, predict the hits.
+```{r}
+# Create a data frame with AVG and SLG entries
+test191 <- data.frame(AVG = c(.305), SLG = c(.500))
+
+# Predict the position with the model and test data
+predictedH191 <- predict(model191, test191)
+cat("At .305 Average, the Hits is", predictedH191)
+```
+# Multivariate Linear Regression 2
+Given 2 independent variables, predict the dependent variable.
+Given the batting average and on-base percentage, let's predict the player's amount of hits.
+```{r}
+model192 <- lm(H ~ AVG + OBP, data = batting)
+model192
+```
+# Prediction
+Given an average of .305 and on-base of .400, predict the hits.
+```{r}
+# Create a data frame with AVG and OBP entries
+test192 <- data.frame(AVG = c(.305), OBP = c(.400))
+
+# Predict the position with the model and test data
+predictedH192 <- predict(model192, test192)
+cat("At .305 Average, the Hits is", predictedH192)
+```
+# Multivariate Linear Regression 3
+Given 3 independent variables, predict the dependent variable.
+Given the batting average and on-base percentage and slugging percentage, let's predict the player's amount of hits.
+```{r}
+model193 <- lm(H ~ AVG + OBP + SLG, data = batting)
+model193
+```
+# Prediction
+Given an average of .305 and on-base of .400 and slugging of .500, predict the hits.
+```{r}
+# Create a data frame with AVG, OBP and SLG entries
+test193 <- data.frame(AVG = c(.305), OBP = c(.400), SLG = c(.500))
+
+# Predict the position with the model and test data
+predictedH193 <- predict(model193, test193)
+cat("At .305 AVG, the H is", predictedH193)
+```
+# Verification
+Let's see the average hits at .305 batting average.
+```{r}
+# Output table with AVG of .305
+avg30519 <- subset(batting, AVG == .305)
+avg30519
+
+# Calculate the avg and sd of Hits when AVG is .305
+avgH19 <- mean(avg30519$H)
+sdH19 <- sd(avg30519$H)
+```
+Loading CaTools
+```{r}
+install.packages("caTools")
+library(caTools)
+```
+# Mulivariate 1
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample191 = sample.split(batting$AB, SplitRatio = .75)
+train191 = subset(batting, sample191 == TRUE)
+test191 = subset(batting, sample191 == FALSE)
+```
+
+```{r}
+predict191 <- lm(H ~ AVG, data = test191)
+predict191
+```
+
+```{r}
+# Predict the position with the model and test data
+predictedH191 <- predict(predict191, test191)
+predictedH191
+
+# Create data frame with actual and predicted values
+battingPrediction191 <- data.frame(AVG = test191$AVG, 
+                               ActualH = test191$H,
+                               PredictedH = predictedH191)
+
+battingPrediction191
+```
+# Multivariate 2
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample192 = sample.split(batting$AB, SplitRatio = .75)
+train192 = subset(batting, sample192 == TRUE)
+test192  = subset(batting, sample192 == FALSE)
+```
+
+```{r}
+predict192 <- lm(H ~ AVG + OBP, data = train191)
+predict192
+```
+
+```{r}
+# Predict the position with the model and test data
+predictedH192 <- predict(predict192, test192)
+predictedH192
+
+# Create data frame with actual and predicted values
+battingPrediction192 <- data.frame(AVG = test191$AVG, 
+                               ActualH = test191$H,
+                               PredictedH = predictedH192)
+
+battingPrediction192
+```
+# Multivariate 3
+```{r}
+# Set the random seed for repeatability
+set.seed(123) 
+
+# Split the data into 3:1 ratio
+sample193 = sample.split(batting$AB, SplitRatio = .75)
+train193 = subset(batting, sample193 == TRUE)
+test193  = subset(batting, sample193 == FALSE)
+```
+
+```{r}
+predict193 <- lm(H ~ AVG + OBP + SLG, data = train193)
+predict193
+```
+
+```{r}
+# Predict the position with the model and test data
+predictedH193 <- predict(predict193, test193)
+predictedH193
+
+# Create data frame with actual and predicted values
+battingPrediction193 <- data.frame(AVG = test193$AVG, 
+                               ActualH = test193$H,
+                               PredictedH = predictedH193)
+
+battingPrediction193
+```
+# Visualization
+Hits vs. Average
+```{r}
+ggplot(data = battingPrediction192, mapping = aes(x = AVG)) +
+  geom_point(data = battingPrediction192, 
+             mapping = aes(y = ActualH),
+             color = "blue") +
+  geom_point(data = battingPrediction192, 
+             mapping = aes(y = PredictedH), 
+             color = "red") +
+  labs(title = "Hits vs. Average" ,
+        subtitle = "Actual (Blue) vs. Predicted (Red)",
+        y = "Hits", x = "Average")
+```
+
+```{r}
+summary(model192)
+```
+# Loading Metrics
+```{r}
+# Using the Metrics library for MSE
+install.packages("Metrics")
+library(Metrics)
+```
+# Multivariate 1
+```{r}
+# Mean Absolute Error
+mae191 <- mae(battingPrediction191$ActualH, battingPrediction191$PredictedH)
+cat("Mean Absolute Error:", mae191)
+```
+```{r}
+# Mean Squared Error
+mse191 <- mse(battingPrediction191$ActualH, battingPrediction191$PredictedH)
+cat("Mean Squared Error:", mse191)
+```
+```{r}
+# Root Mean Squared Error
+sqrt(mse191)
+rmse191 <- rmse(battingPrediction191$ActualH, battingPrediction191$PredictedH)
+cat("Root Mean Squared Error:", rmse191)
+```
+# Multivariate 2
+```{r}
+# Mean Absolute Error
+mae192 <- mae(battingPrediction192$ActualH, battingPrediction192$PredictedH)
+cat("Mean Absolute Error:", mae192)
+```
+```{r}
+# Mean Squared Error
+mse192 <- mse(battingPrediction192$ActualH, battingPrediction192$PredictedH)
+cat("Mean Squared Error:", mse192)
+```
+```{r}
+# Root Mean Squared Error
+sqrt(mse192)
+rmse192 <- rmse(battingPrediction192$ActualH, battingPrediction192$PredictedH)
+cat("Root Mean Squared Error:", rmse192)
+```
+# Multivariate 3
+```{r}
+# Mean Absolute Error
+mae193 <- mae(battingPrediction193$ActualH, battingPrediction193$PredictedH)
+cat("Mean Absolute Error:", mae193)
+```
+```{r}
+# Mean Squared Error
+mse193 <- mse(battingPrediction193$ActualH, battingPrediction193$PredictedH)
+cat("Mean Squared Error:", mse193)
+```
+```{r}
+# Root Mean Squared Error
+sqrt(mse193)
+rmse193 <- rmse(battingPrediction193$ActualH, battingPrediction193$PredictedH)
+cat("Root Mean Squared Error:", rmse193)
+```
+
